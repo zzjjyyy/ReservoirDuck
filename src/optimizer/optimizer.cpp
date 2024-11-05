@@ -27,6 +27,7 @@
 #include "duckdb/optimizer/topn_optimizer.hpp"
 #include "duckdb/optimizer/unnest_rewriter.hpp"
 #include "duckdb/optimizer/join_filter_pushdown_optimizer.hpp"
+#include "duckdb/optimizer/reservior_insert.hpp"
 #include "duckdb/planner/binder.hpp"
 #include "duckdb/planner/planner.hpp"
 
@@ -228,6 +229,11 @@ void Optimizer::RunBuiltInOptimizers() {
 	RunOptimizer(OptimizerType::JOIN_FILTER_PUSHDOWN, [&]() {
 		JoinFilterPushdownOptimizer join_filter_pushdown(*this);
 		join_filter_pushdown.VisitOperator(*plan);
+	});
+
+	RunOptimizer(OptimizerType::RESERVIOR_INSERT, [&]() {
+		ReserviorInsert insertion(context);
+		plan = insertion.Rewrite(std::move(plan));
 	});
 }
 
